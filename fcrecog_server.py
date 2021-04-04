@@ -15,6 +15,8 @@ import logging
 import face_recognition
 import os
 import os.path
+import pwd
+import grp
 
 debug = False;
 
@@ -59,8 +61,12 @@ def update_models(name, image):
   f = open(fp, 'wb')
   f.write(image)
   f.close()
+  # we are root, change the file ownership 
+  uid = pwd.getpwnam("ccoupe").pw_uid
+  gid = grp.getgrnam("root").gr_gid
+  os.chown(fp, uid, gid)
+  os.chmod(fp, 0o664)
   log.info(f'created {fp}')
- 
   img = face_recognition.load_image_file(fp)
   try:
     encoding = face_recognition.face_encodings(img)[0]
